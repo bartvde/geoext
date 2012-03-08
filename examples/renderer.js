@@ -84,6 +84,18 @@ var stacked = {
     }]
 };
 
+var graphic = {
+    text: [new OpenLayers.Symbolizer.Text({
+        label: "Ab",
+        labelAlign: "cm",
+        fontColor: "#FF0000",
+        graphicName: "square",
+        pointRadius: 10,
+        fillColor: "yellow"
+    })]
+};
+
+
 var configs = [{
     symbolType: "Point",
     renderTo: "point_default"
@@ -137,9 +149,20 @@ var configs = [{
     symbolType: "Text",
     symbolizers: stacked.text,
     renderTo: "text_stacked"
+}, {
+    symbolType: "Text",
+    renderTo: "text-only",
+    symbolizers: graphic.text
+}, {
+    symbolType: "Polygon",
+    renderTo: "graphic-only",
+    symbolizers: graphic.text
+}, {
+    renderTo: "text-graphic",
+    symbolizers: graphic.text
 }];
 
-Ext.onReady(function() {        
+Ext.onReady(function() {
     for(var i=0; i<configs.length; ++i) {
         new GeoExt.FeatureRenderer(configs[i]);
     }
