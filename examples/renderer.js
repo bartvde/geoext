@@ -84,17 +84,18 @@ var stacked = {
     }]
 };
 
-var graphic = {
-    text: [new OpenLayers.Symbolizer.Text({
+var graphicText = {
+    text: new OpenLayers.Symbolizer.Text({
         label: "Ab",
         labelAlign: "cm",
-        fontColor: "#FF0000",
+        fontColor: "#FF0000"
+    }),
+    graphic: {
         graphicName: "square",
         pointRadius: 10,
         fillColor: "yellow"
-    })]
+    }
 };
-
 
 var configs = [{
     symbolType: "Point",
@@ -152,14 +153,15 @@ var configs = [{
 }, {
     symbolType: "Text",
     renderTo: "text-only",
-    symbolizers: graphic.text
+    symbolizers: [graphicText.text]
 }, {
-    symbolType: "Polygon",
+    symbolType: "Text",
     renderTo: "graphic-only",
-    symbolizers: graphic.text
+    symbolizers: [graphicText.graphic]
 }, {
     renderTo: "text-graphic",
-    symbolizers: graphic.text
+    symbolizers: [graphicText.text, graphicText.graphic],
+    symbolType: "Text"
 }];
 
 Ext.onReady(function() {
