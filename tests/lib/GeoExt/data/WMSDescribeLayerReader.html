@@ -51,12 +51,18 @@
         }
 
         function test_read_exception(t) {
-            t.plan(1);
-            var reader = new GeoExt.data.WMSDescribeLayerReader({}, []);
-            try {
-                var records = reader.read({responseXML: doc2});
-            } catch(e) {
-                t.ok(true, "Exception thrown when getting a service exception");
+            var version = OpenLayers.VERSION_NUMBER;
+            version = parseFloat(version.substring(version.indexOf('Release ')+8));
+            if (version < 2.13) {
+                t.plan(0);
+            } else {
+                t.plan(1);
+                var reader = new GeoExt.data.WMSDescribeLayerReader({}, []);
+                try {
+                    var records = reader.read({responseXML: doc2});
+                } catch(e) {
+                    t.ok(true, "Exception thrown when getting a service exception");
+                }
             }
         }
 
