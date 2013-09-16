@@ -28,47 +28,22 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
         }
         GeoExt.WMSLegend.superclass.update.apply(this, arguments);
 
-        var layerNames, layerName, i, len;
-
-        layerNames = [layer.params.LAYERS].join(",").split(",");
-
-        var destroyList = [];
         var textCmp = this.items.find(function(item){
             return item.isXType('label');
         });
+        var found = false;
         this.items.each(function(cmp) {
-            i = layerNames.indexOf(cmp.itemId);
-            if(i < 0 && cmp != textCmp) {
-                destroyList.push(cmp);
-            } else if(cmp !== textCmp){
-                layerName = layerNames[i];
-                var newUrl = this.getLegendUrl(layerName, layerNames);
-                if(!OpenLayers.Util.isEquivalentUrl(newUrl, cmp.url)) {
-                    cmp.setUrl(newUrl);
-                }
+            if(cmp !== textCmp) {
+                found = true;
+                cmp.setUrl(this.getLegendUrl());
             }
         }, this);
-        for(i = 0, len = destroyList.length; i<len; i++) {
-            var cmp = destroyList[i];
-            // cmp.destroy() does not remove the cmp from
-            // its parent container!
-            this.remove(cmp);
-            cmp.destroy();
+        if (found === false) {
+            this.add({
+                xtype: this.itemXType,
+                url: this.getLegendUrl()
+            });
         }
-        this.add({
-            xtype: this.itemXType,
-            url: this.getLegendUrl()
-        });
-        /*for(i = 0, len = layerNames.length; i<len; i++) {
-            layerName = layerNames[i];
-            if(!this.items || !this.getComponent(layerName)) {
-                this.add({
-                    xtype: this.itemXType,
-                    url: this.getLegendUrl(layerName, layerNames),
-                    itemId: layerName
-                });
-            }
-        }*/
         this.doLayout();
     },
     getLegendUrl: function() {
