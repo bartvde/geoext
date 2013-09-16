@@ -12,91 +12,100 @@
  *  Display a layer legend in a panel.
  */
 
+Ext.ns('GisArts');
+
+GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
+    onLayerMoveend: function() {
+        this.update();
+    },
+    update: function() {
+        var layer = this.layerRecord.getLayer();
+        // In some cases, this update function is called on a layer
+        // that has just been removed, see ticket #238.
+        // The following check bypass the update if map is not set.
+        if(!(layer && layer.map)) {
+            return;
+        }
+        GeoExt.WMSLegend.superclass.update.apply(this, arguments);
+
+        var layerNames, layerName, i, len;
+
+        layerNames = [layer.params.LAYERS].join(",").split(",");
+
+        var destroyList = [];
+        var textCmp = this.items.find(function(item){
+            return item.isXType('label');
+        });
+        this.items.each(function(cmp) {
+            i = layerNames.indexOf(cmp.itemId);
+            if(i < 0 && cmp != textCmp) {
+                destroyList.push(cmp);
+            } else if(cmp !== textCmp){
+                layerName = layerNames[i];
+                var newUrl = this.getLegendUrl(layerName, layerNames);
+                if(!OpenLayers.Util.isEquivalentUrl(newUrl, cmp.url)) {
+                    cmp.setUrl(newUrl);
+                }
+            }
+        }, this);
+        for(i = 0, len = destroyList.length; i<len; i++) {
+            var cmp = destroyList[i];
+            // cmp.destroy() does not remove the cmp from
+            // its parent container!
+            this.remove(cmp);
+            cmp.destroy();
+        }
+        this.add({
+            xtype: this.itemXType,
+            url: this.getLegendUrl()
+        });
+        /*for(i = 0, len = layerNames.length; i<len; i++) {
+            layerName = layerNames[i];
+            if(!this.items || !this.getComponent(layerName)) {
+                this.add({
+                    xtype: this.itemXType,
+                    url: this.getLegendUrl(layerName, layerNames),
+                    itemId: layerName
+                });
+            }
+        }*/
+        this.doLayout();
+    },
+    getLegendUrl: function() {
+        var rec = this.layerRecord;
+        var layer = rec.getLayer();
+        var url;
+        if (layer.map && layer.map.getExtent() !== null) {
+            url = layer.getURL(layer.map.getExtent());
+            url = url.replace('GetMap', 'GetLegendGraphic');
+        }
+        return url;
+    }
+});
+
+Ext.reg('gisarts_wmslegend', GisArts.WMSLegend);
 
 var mapPanel, legendPanel;
 
 Ext.onReady(function() {
-    var map = new OpenLayers.Map({allOverlays: true});
+    var map = new OpenLayers.Map({projection: "EPSG:28992", maxExtent: new OpenLayers.Bounds(175000, 400000, 194000, 422000), units: 'm', scales: [10000001, 5000001, 2000001, 1500001, 1000001, 750001, 500001, 375001, 250001, 100001, 50001, 25001, 10001, 5001, 2501, 1001, 501, 251, 101, 1], allOverlays: true});
     map.addLayers([
         new OpenLayers.Layer.WMS(
-            "Blue Marble",
-            "http://demo.opengeo.org/geoserver/wms?",
-            {layers: 'topp:bluemarble', format: 'image/jpeg'},
-            {singleTile: true}),
-        new OpenLayers.Layer.WMS(
-            "Vegetation and Natural Landmarks",
-            "http://demo.opengeo.org/geoserver/wms?",
-            {layers: 'za_vegetation,za_natural', format: 'image/png', transparent: true},
-            {singleTile: true}),
-        new OpenLayers.Layer.Vector('Polygons', {styleMap: new OpenLayers.StyleMap({
-                "default": new OpenLayers.Style({
-                    pointRadius: 8,
-                    fillColor: "#00ffee",
-                    strokeColor: "#000000",
-                    strokeWidth: 2
-                }) }) })
-    ]);
-    map.layers[2].addFeatures([
-        new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(
-            "POLYGON(29 -30, 29.5 -30, 29.5 -31, 28.5 -31.5, 29 -30)"))
+            "BGT",
+            "http://www.cgmgis.nl/cgi-bin/mapserv?",
+            {layers: ["bgt_buitengebied", "bgt_wegdeel", "bgt_ondersteunendwegdeel", "bgt_weginrichtingselement", "bgt_begroeidterreindeel", "bgt_vegetatieobject", "bgt_functioneelgebied", "bgt_onbegroeidterreindeel", "bgt_waterdeel", "bgt_ondersteunendwaterdeel", "bgt_overbruggingsdeel", "bgt_scheiding", "bgt_overschrijding", "bgt_onbekendmeten", "bgt_data", "bgt_reconstructie"], format: "image/gif", map: "/home/gisarts/apps/gisportalen/cgmgis/map/authenticatie/basis.map"},
+            {singleTile: true})
     ]);
     map.addControl(new OpenLayers.Control.LayerSwitcher());
-
-    var addRemoveLayer = function() {
-        if(mapPanel.map.layers.indexOf(water) == -1) {
-            mapPanel.map.addLayer(water);
-        } else {
-            mapPanel.map.removeLayer(water);
-        }
-    };
-
-    var moveLayer = function(idx) {
-        var layer = layerRec0.getLayer();
-        var idx = mapPanel.map.layers.indexOf(layer) == 0 ?
-            mapPanel.map.layers.length : 0;
-        mapPanel.map.setLayerIndex(layerRec0.getLayer(), idx);
-    };
-
-    var toggleVisibility = function() {
-        var layer = layerRec1.getLayer();
-        layer.setVisibility(!layer.getVisibility());
-    };
-
-    var updateHideInLegend = function() {
-        layerRec0.set("hideInLegend", !layerRec0.get("hideInLegend"));
-    };
-
-    var updateLegendUrl = function() {
-        var url = layerRec0.get("legendURL");
-        layerRec0.set("legendURL", otherUrl);
-        otherUrl = url;
-    };
 
     mapPanel = new GeoExt.MapPanel({
         region: 'center',
         height: 400,
         width: 600,
         map: map,
-        center: new OpenLayers.LonLat(29, -30),
-        zoom: 7
+        center: new OpenLayers.LonLat(187810.65642, 416570.47872),
+        zoom: 14
     });
-
-    // give the record of the 1st layer a legendURL, which will cause
-    // UrlLegend instead of WMSLegend to be used
-    var layerRec0 = mapPanel.layers.getAt(0);
-    layerRec0.set("legendURL", "http://demo.opengeo.org/geoserver/wms?request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=bluemarble");
-
-    // store the layer that we will modify in toggleVis()
-    var layerRec1 = mapPanel.layers.getAt(1);
-
-    // stores another legendURL for the legendurl button action
-    var otherUrl = "http://www.geoext.org/trac/geoext/chrome/site/img/GeoExt.png";
-
-    // create another layer for the add/remove button action
-    var water = new OpenLayers.Layer.WMS("Roads",
-        "http://demo.opengeo.org/geoserver/wms?",
-        {layers: 'za_roads', format: 'image/png', transparent: true},
-        {singleTile: true});
 
     legendPanel = new GeoExt.LegendPanel({
         defaults: {
@@ -104,6 +113,7 @@ Ext.onReady(function() {
             style: 'padding:5px',
             itemXType: 'custom_legendimage'
         },
+        preferredTypes: ['gisarts_wmslegend'],
         cls: "legendpanel",
         bodyStyle: 'padding:5px',
         width: 350,
@@ -117,15 +127,6 @@ Ext.onReady(function() {
         renderTo: 'view',
         height: 400,
         width: 800,
-        tbar: new Ext.Toolbar({
-            items: [
-                {text: 'add/remove', handler: addRemoveLayer},
-                {text: 'movetop/bottom', handler: moveLayer },
-                {text: 'togglevis', handler: toggleVisibility},
-                {text: 'hide/show', handler: updateHideInLegend},
-                {text: 'legendurl', handler: updateLegendUrl}
-            ]
-        }),
         items: [legendPanel, mapPanel]
     });
 });
