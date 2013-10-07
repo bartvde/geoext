@@ -14,6 +14,28 @@
 
 Ext.ns('GisArts');
 
+GeoExt.LegendPanel.prototype.onRender = function() {
+    GeoExt.LegendPanel.superclass.onRender.apply(this, arguments);
+    if(!this.layerStore) {
+        this.layerStore = GeoExt.MapPanel.guess().layers;
+    }
+    if (this.legendLayers) {
+        for (var i=this.legendLayers.length; i >= 0; --i) {
+            var title = this.legendLayers[i];
+            var recordIndex = this.layerStore.findBy(function(rec, id) {
+                return (rec.getLayer().name === title);
+            });
+            if (recordIndex > -1) {
+                this.addLegend(this.layerStore.getAt(recordIndex));
+            }
+        }
+    } else {
+        this.layerStore.each(function(record) {
+            this.addLegend(record);
+        }, this);
+    }
+};
+
 GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
     onLayerMoveend: function() {
         this.update();
@@ -64,7 +86,7 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
             newParams.HEIGHT = imageSize.h;
             newParams.REQUEST = 'GetLegendGraphic';
             if (layer.legendLayers) {
-                newParams.LAYERS = layer.legendLayers;
+                newParams.LAYERS = layer.legendLayers.reverse();
             }
             url = layer.getFullRequestString(newParams);
         }
@@ -90,7 +112,7 @@ Ext.onReady(function() {
             "BGT",
             "https://www.cgmgis.nl/cgi-bin/mapserv?",
             {layers: ["bgt_buitengebied", "bgt_wegdeel", "bgt_ondersteunendwegdeel", "bgt_weginrichtingselement", "bgt_begroeidterreindeel", "bgt_vegetatieobject", "bgt_functioneelgebied", "bgt_onbegroeidterreindeel", "bgt_waterdeel", "bgt_ondersteunendwaterdeel", "bgt_overbruggingsdeel", "bgt_scheiding", "bgt_overschrijding", "bgt_onbekendmeten", "bgt_data", "bgt_reconstructie"], format: "image/gif", map: "/home/gisarts/apps/gisportalen/cgmgis/map/authenticatie/basis.map"},
-            {singleTile: true, legendLayers: ["bgt_reconstructie", "bgt_overbruggingsdeel", "bgt_wegdeel"]}),
+            {singleTile: true, /* top to bottom */ legendLayers: ["bgt_reconstructie", "bgt_overbruggingsdeel", "bgt_wegdeel"]}),
         new OpenLayers.Layer.WMS(
             "Topografie",
             "https://www.cgmgis.nl/cgi-bin/mapserv?",
@@ -122,6 +144,8 @@ Ext.onReady(function() {
         },
         preferredTypes: ['gisarts_wmslegend'],
         cls: "legendpanel",
+        /* top to bottom */
+        legendLayers: ["BGT", "Topografie", "Kadastrale informatie"],
         bodyStyle: 'padding:5px',
         width: 350,
         autoScroll: true,
