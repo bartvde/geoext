@@ -58,6 +58,13 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
     }
 });
 
+GisArts.WMSLegend.supports = function(layerRecord) {
+    return layerRecord.getLayer() instanceof OpenLayers.Layer.WMS ? 1 : 0;
+};
+
+/** api: legendtype = gisarts_wmslegend */
+GeoExt.LayerLegend.types["gisarts_wmslegend"] = GisArts.WMSLegend;
+
 Ext.reg('gisarts_wmslegend', GisArts.WMSLegend);
 
 var mapPanel, legendPanel;
