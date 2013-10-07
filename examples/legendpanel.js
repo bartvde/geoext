@@ -90,7 +90,19 @@ Ext.onReady(function() {
             "BGT",
             "https://www.cgmgis.nl/cgi-bin/mapserv?",
             {layers: ["bgt_buitengebied", "bgt_wegdeel", "bgt_ondersteunendwegdeel", "bgt_weginrichtingselement", "bgt_begroeidterreindeel", "bgt_vegetatieobject", "bgt_functioneelgebied", "bgt_onbegroeidterreindeel", "bgt_waterdeel", "bgt_ondersteunendwaterdeel", "bgt_overbruggingsdeel", "bgt_scheiding", "bgt_overschrijding", "bgt_onbekendmeten", "bgt_data", "bgt_reconstructie"], format: "image/gif", map: "/home/gisarts/apps/gisportalen/cgmgis/map/authenticatie/basis.map"},
-            {singleTile: true, legendLayers: ["bgt_reconstructie", "bgt_overbruggingsdeel", "bgt_wegdeel"]})
+            {singleTile: true, legendLayers: ["bgt_reconstructie", "bgt_overbruggingsdeel", "bgt_wegdeel"]}),
+        new OpenLayers.Layer.WMS(
+            "Topografie",
+            "https://www.cgmgis.nl/cgi-bin/mapserv?",
+            {layers: ["gbkn_straatnamen", "gbkn_topografie"], transparent: true, format: "image/gif", map: "/home/gisarts/apps/gisportalen/cgmgis/map/authenticatie/basis.map"},
+            {singleTile: true, minScale: 2500, maxScale: 0}
+        ),
+        new OpenLayers.Layer.WMS(
+            "Kadastrale informatie",
+            "https://www.cgmgis.nl/cgi-bin/mapserv?",
+            {layers: ["lki_gemeentegrens", "lki_percelen", "lki_perceelnr", "lki_gemeentegrens"], transparent: true, format: "image/gif", map: "/home/gisarts/apps/gisportalen/cgmgis/map/authenticatie/basis.map"},
+            {singleTile: true}
+        )
     ]);
     map.addControl(new OpenLayers.Control.LayerSwitcher());
 
@@ -106,8 +118,7 @@ Ext.onReady(function() {
     legendPanel = new GeoExt.LegendPanel({
         defaults: {
             labelCls: 'mylabel',
-            style: 'padding:5px',
-            itemXType: 'custom_legendimage'
+            style: 'padding:5px'
         },
         preferredTypes: ['gisarts_wmslegend'],
         cls: "legendpanel",
@@ -126,34 +137,3 @@ Ext.onReady(function() {
         items: [legendPanel, mapPanel]
     });
 });
-
-// here we create a customized LegendImage component. Our goal is to add a label
-// for each layer.PARAMS.LAYERS' item.
-CustomLegendImage = Ext.extend(GeoExt.LegendImage, {
-    initComponent: function() {
-        CustomLegendImage.superclass.initComponent.call(this);
-        this.autoEl = {
-            tag: "div",
-            children: [{
-                tag: 'label',
-                html: OpenLayers.i18n(this.itemId)
-            },{
-                tag: "img",
-                "class": (this.imgCls ? this.imgCls + " " + this.noImgCls : this.noImgCls),
-                src: this.defaultImgSrc
-            }]
-        };
-    },
-
-    getImgEl: function() {
-        return Ext.select('img', false, this.getEl().dom).first();
-    }
-});
-Ext.reg('custom_legendimage', CustomLegendImage);
-
-OpenLayers.Lang.en = {
-    'za_vegetation': 'Vegetation',
-    'za_natural': 'Natural Landmarks',
-    'za_roads': 'Roads'
-};
-OpenLayers.Lang.setCode('en');
