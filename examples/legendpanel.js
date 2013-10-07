@@ -51,8 +51,22 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
         var layer = rec.getLayer();
         var url;
         if (layer.map && layer.map.getExtent() !== null) {
-            url = layer.getURL(layer.map.getExtent());
-            url = url.replace('GetMap', 'GetLegendGraphic');
+            var bounds = layer.map.getExtent();
+            bounds = layer.adjustBounds(bounds);
+            var imageSize = layer.getImageSize(bounds);
+            var newParams = {};
+            // WMS 1.3 introduced axis order
+            var reverseAxisOrder = layer.reverseAxisOrder();
+            newParams.BBOX = layer.encodeBBOX ?
+                bounds.toBBOX(null, reverseAxisOrder) :
+                bounds.toArray(reverseAxisOrder);
+            newParams.WIDTH = imageSize.w;
+            newParams.HEIGHT = imageSize.h;
+            newParams.REQUEST = 'GetLegendGraphic';
+            if (layer.legendLayers) {
+                newParams.LAYERS = layer.legendLayers;
+            }
+            url = layer.getFullRequestString(newParams);
         }
         return url;
     }
@@ -74,9 +88,9 @@ Ext.onReady(function() {
     map.addLayers([
         new OpenLayers.Layer.WMS(
             "BGT",
-            "http://www.cgmgis.nl/cgi-bin/mapserv?",
+            "https://www.cgmgis.nl/cgi-bin/mapserv?",
             {layers: ["bgt_buitengebied", "bgt_wegdeel", "bgt_ondersteunendwegdeel", "bgt_weginrichtingselement", "bgt_begroeidterreindeel", "bgt_vegetatieobject", "bgt_functioneelgebied", "bgt_onbegroeidterreindeel", "bgt_waterdeel", "bgt_ondersteunendwaterdeel", "bgt_overbruggingsdeel", "bgt_scheiding", "bgt_overschrijding", "bgt_onbekendmeten", "bgt_data", "bgt_reconstructie"], format: "image/gif", map: "/home/gisarts/apps/gisportalen/cgmgis/map/authenticatie/basis.map"},
-            {singleTile: true})
+            {singleTile: true, legendLayers: ["bgt_reconstructie", "bgt_overbruggingsdeel", "bgt_wegdeel"]})
     ]);
     map.addControl(new OpenLayers.Control.LayerSwitcher());
 
