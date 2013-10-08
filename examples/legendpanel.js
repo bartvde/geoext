@@ -86,7 +86,13 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
             newParams.HEIGHT = imageSize.h;
             newParams.REQUEST = 'GetLegendGraphic';
             if (layer.legendLayers) {
-                newParams.LAYERS = layer.legendLayers.reverse();
+                var layers = [];
+                for (var i=layer.legendLayers.length-1; i >= 0; i--) {
+                    if (layer.params.LAYERS.indexOf(layer.legendLayers[i]) >= 0) {
+                        layers.push(layer.legendLayers[i]);
+                    }
+                }
+                newParams.LAYERS = layers;
             }
             url = layer.getFullRequestString(newParams);
         }
