@@ -98,7 +98,8 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
                             this.show();
                             delete this._hide;
                         }
-                    }
+                    },
+                    scope: this
                 },
                 url: this.getLegendUrl()
             });
