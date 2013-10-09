@@ -15,7 +15,7 @@
 Ext.ns('GisArts');
 
 GeoExt.LegendImage.prototype.onImageLoad = function() {
-    var el = this.getImgEl();
+    var el = this.getEl();
     if (el.getHeight() == 5) {
         this.fireEvent("empty", this);
     } else {
