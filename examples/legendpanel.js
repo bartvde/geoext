@@ -130,6 +130,19 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
                     }
                 }
                 newParams.LAYERS = layers;
+                // no sublayers, hide label
+                var textCmp = this.items.find(function(item){
+                    return item.isXType('label');
+                });
+                if (layers.length === 0) {
+                    textCmp._subLayerHide = true;
+                    textCmp.hide();
+                } else {
+                    if (textCmp._subLayerHide === true) {
+                        textCmp.show();
+                        delete textCmp._subLayerHide;
+                    }
+                }
             }
             url = layer.getFullRequestString(newParams);
         }
