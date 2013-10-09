@@ -90,13 +90,13 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
                 xtype: this.itemXType,
                 listeners: {
                     'empty': function() {
-                        textCmp._hide = true;
-                        textCmp.hide();
+                        this._hide = true;
+                        this.hide();
                     },
                     'notempty': function() {
-                        if (textCmp._hide === true) {
-                            textCmp.show();
-                            delete textCmp._hide;
+                        if (this._hide === true) {
+                            this.show();
+                            delete this._hide;
                         }
                     }
                 },
@@ -130,17 +130,14 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
                     }
                 }
                 newParams.LAYERS = layers;
-                // no sublayers, hide label
-                var textCmp = this.items.find(function(item){
-                    return item.isXType('label');
-                });
+                // no sublayers, hide
                 if (layers.length === 0) {
-                    textCmp._subLayerHide = true;
-                    textCmp.hide();
+                    this._subLayerHide = true;
+                    this.hide();
                 } else {
-                    if (textCmp._subLayerHide === true) {
-                        textCmp.show();
-                        delete textCmp._subLayerHide;
+                    if (this._subLayerHide === true) {
+                        this.show();
+                        delete this._subLayerHide;
                     }
                 }
             }
