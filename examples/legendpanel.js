@@ -26,6 +26,19 @@ GeoExt.LegendImage.prototype.onImageLoad = function() {
     }
 };
 
+// for GeoExt version 1.1
+GeoExt.LegendImage.prototype.setUrl = function(url) {
+    this.url = url;
+    var el = this.getEl();
+    if (el) {
+        el.un("load", this.onImageLoad, this);
+        el.on("load", this.onImageLoad, this, {single: true});
+        el.un("error", this.onImageLoadError, this);
+        el.on("error", this.onImageLoadError, this, {single: true});
+        el.dom.src = url;
+    }
+};
+
 GeoExt.LegendPanel.prototype.onRender = function() {
     GeoExt.LegendPanel.superclass.onRender.apply(this, arguments);
     if(!this.layerStore) {
