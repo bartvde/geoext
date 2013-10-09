@@ -14,6 +14,18 @@
 
 Ext.ns('GisArts');
 
+GeoExt.LegendImage.prototype.onImageLoad = function() {
+    var el = this.getImgEl();
+    if (el.getHeight() == 5) {
+        this.fireEvent("empty", this);
+    } else {
+        this.fireEvent("notempty", this);
+    }
+    if (!OpenLayers.Util.isEquivalentUrl(el.dom.src, this.defaultImgSrc)) {
+        el.removeClass(this.noImgCls);
+    }
+};
+
 GeoExt.LegendPanel.prototype.onRender = function() {
     GeoExt.LegendPanel.superclass.onRender.apply(this, arguments);
     if(!this.layerStore) {
@@ -63,6 +75,18 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
         if (found === false) {
             this.add({
                 xtype: this.itemXType,
+                listeners: {
+                    'empty': function() {
+                        textCmp._hide = true;
+                        textCmp.hide();
+                    },
+                    'notempty': function() {
+                        if (textCmp._hide === true) {
+                            textCmp.show();
+                            delete textCmp._hide;
+                        }
+                    }
+                },
                 url: this.getLegendUrl()
             });
         }
