@@ -16,7 +16,7 @@ Ext.ns('GisArts');
 
 GeoExt.LegendImage.prototype.onImageLoad = function() {
     var el = this.getEl();
-    if (el.getHeight() == 5) {
+    if (el.getHeight() <= 5) {
         this.fireEvent("empty", this);
     } else {
         this.fireEvent("notempty", this);
@@ -72,6 +72,9 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
         // The following check bypass the update if map is not set.
         if(!(layer && layer.map)) {
             return;
+        }
+        if (layer.calculateInRange()) {
+            this.show();
         }
         GeoExt.WMSLegend.superclass.update.apply(this, arguments);
 
