@@ -159,6 +159,14 @@ Ext.reg('gisarts_wmslegend', GisArts.WMSLegend);
 
 var mapPanel, legendPanel;
 
+var changeCenter = function() {
+    mapPanel.map.setCenter(new OpenLayers.LonLat(187810.65642, 416570.47872));
+};
+
+var changeCenter2 = function() {
+    mapPanel.map.setCenter(new OpenLayers.LonLat(181157.6631767, 410849.91089325));
+}; 
+
 Ext.onReady(function() {
     var map = new OpenLayers.Map({projection: "EPSG:28992", maxExtent: new OpenLayers.Bounds(175000, 400000, 194000, 422000), units: 'm', scales: [10000001, 5000001, 2000001, 1500001, 1000001, 750001, 500001, 375001, 250001, 100001, 50001, 25001, 10001, 5001, 2501, 1001, 501, 251, 101, 1], allOverlays: true});
     map.addLayers([
@@ -187,7 +195,7 @@ Ext.onReady(function() {
         height: 400,
         width: 600,
         map: map,
-        center: new OpenLayers.LonLat(187810.65642, 416570.47872),
+        center: new OpenLayers.LonLat(181157.6631767, 410849.91089325),
         zoom: 14
     });
 
