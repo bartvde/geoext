@@ -73,7 +73,7 @@ GisArts.WMSLegend = Ext.extend(GeoExt.WMSLegend, {
         if(!(layer && layer.map)) {
             return;
         }
-        if (layer.calculateInRange()) {
+        if (layer.calculateInRange() && layer.getVisibility() && layer.displayInLayerSwitcher) {
             this.show();
         }
         GeoExt.WMSLegend.superclass.update.apply(this, arguments);
